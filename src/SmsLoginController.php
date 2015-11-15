@@ -16,100 +16,109 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
-class SmsLoginController {
+class SmsLoginController
+{
 
-  /**
-   * An array of countries for the select list options.
-   *
-   * @var array
-   */
-  protected $countries;
+    /**
+     * An array of countries for the select list options.
+     *
+     * @var array
+     */
+    protected $countries;
 
-  /**
-   * SMS Handler used to send validate numbers and send SMS verification
-   *
-   * @var \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface
-   */
-  protected $handler;
+    /**
+     * SMS Handler used to send validate numbers and send SMS verification
+     *
+     * @var \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface
+     */
+    protected $handler;
 
-  /**
-   * String used to create verification SMS message, must contain `%s` which
-   * is replaced by the verification code.
-   *
-   * @var string
-   */
-  protected $messageTemplate;
+    /**
+     * String used to create verification SMS message, must contain `%s` which
+     * is replaced by the verification code.
+     *
+     * @var string
+     */
+    protected $messageTemplate;
 
-  /**
-   * The name of the view template to use to render the login form.
-   * Defaults to 'login.twig'
-   *
-   * @var string
-   */
-  protected $viewName;
+    /**
+     * The name of the view template to use to render the login form.
+     * Defaults to 'login.twig'
+     *
+     * @var string
+     */
+    protected $viewName;
 
-  protected $debug;
+    protected $debug;
 
-  /**
-   * SmsLoginController constructor.
-   * @param \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface $handler
-   * @param string|NULL $view
-   * @param string|NULL $message
-   * @param null $debug
-   */
-  public function __construct(SmsHandlerInterface $handler, $view = null, $message = null, $debug = null) {
-    $this->messageTemplate = $message ?: 'Security code: %s';
-    $this->debug = $debug ?: FALSE;
-    $countryData = file_get_contents( __DIR__ . '/../data/countries.json');
-    $this->countries = json_decode($countryData);
-    $this->handler = $handler;
-    $this->viewName = $view ?: 'login.twig';
-  }
-
-  /**
-   * Login controller action
-   * Step 1: Login shows form to enter mobile phone number.
-   *
-   * @param \Silex\Application $app
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   * @return string
-   */
-  public function loginAction(Application $app, Request $request) {
-    return $app['twig']->render($this->viewName, [
-      'country_list' => $this->countries,
-      'error' => $app['security.last_error']($request),
-      'form_action' => $app['url_generator']->generate('sms.login'),
-    ]);
-  }
-
-  /**
-   * Verify controller action
-   * Step 2: Send code to number by SMS and show form to verify code
-   *
-   * @param \Silex\Application $app
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   * @return string
-   */
-  public function verifyAction(Application $app, Request $request) {
-    $mobile = $request->get('mobile');
-    $country = $request->get('country');
-
-    if (empty($mobile)) {
-      throw new AuthenticationException('Mobile number is required');
+    /**
+     * SmsLoginController constructor.
+     * @param \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface $handler
+     * @param string|NULL $view
+     * @param string|NULL $message
+     * @param null $debug
+     */
+    public function __construct(
+      SmsHandlerInterface $handler,
+      $view = null,
+      $message = null,
+      $debug = null
+    ) {
+        $this->messageTemplate = $message ?: 'Security code: %s';
+        $this->debug = $debug ?: false;
+        $countryData = file_get_contents(__DIR__ . '/../data/countries.json');
+        $this->countries = json_decode($countryData);
+        $this->handler = $handler;
+        $this->viewName = $view ?: 'login.twig';
     }
 
-    $number = $this->debug ? $mobile : $this->handler->lookupNumber($mobile, $country);
-    $code = sprintf("%'.04d", rand(0, 9999));
-    $app['session']->set('code', $code);
-    $message = sprintf($this->messageTemplate, $code);
-    if (!$this->debug) {
-      $this->handler->sendSMS($number, $message);
+    /**
+     * Login controller action
+     * Step 1: Login shows form to enter mobile phone number.
+     *
+     * @param \Silex\Application $app
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return string
+     */
+    public function loginAction(Application $app, Request $request)
+    {
+        return $app['twig']->render($this->viewName, [
+          'country_list' => $this->countries,
+          'error' => $app['security.last_error']($request),
+          'form_action' => $app['url_generator']->generate('sms.login'),
+        ]);
     }
 
-    return $app['twig']->render($this->viewName, [
-      'mobile' => $number . ($this->debug ? " ({$code})" : ''),
-      'form_action' => $app['url_generator']->generate('sms.login') . '/check',
-    ]);
-  }
+    /**
+     * Verify controller action
+     * Step 2: Send code to number by SMS and show form to verify code
+     *
+     * @param \Silex\Application $app
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return string
+     */
+    public function verifyAction(Application $app, Request $request)
+    {
+        $mobile = $request->get('mobile');
+        $country = $request->get('country');
+
+        if (empty($mobile)) {
+            throw new AuthenticationException('Mobile number is required');
+        }
+
+        $number = $this->debug ? $mobile : $this->handler->lookupNumber($mobile,
+          $country);
+        $code = sprintf("%'.04d", rand(0, 9999));
+        $app['session']->set('code', $code);
+        $message = sprintf($this->messageTemplate, $code);
+        if (!$this->debug) {
+            $this->handler->sendSMS($number, $message);
+        }
+
+        return $app['twig']->render($this->viewName, [
+          'mobile' => $number . ($this->debug ? " ({$code})" : ''),
+          'form_action' => $app['url_generator']->generate('sms.login') . '/check',
+        ]);
+    }
 
 }

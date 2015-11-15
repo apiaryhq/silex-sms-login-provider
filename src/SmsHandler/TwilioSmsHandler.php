@@ -34,7 +34,8 @@ class TwilioSMSHandler implements SmsHandlerInterface
     {
         $this->accountSid = $accountSid;
         $this->authToken = $authToken;
-        $this->client = new Services_Twilio($this->accountSid, $this->authToken);
+        $this->client = new Services_Twilio($this->accountSid,
+          $this->authToken);
     }
 
     public function setDefaultFrom($from)
@@ -45,11 +46,12 @@ class TwilioSMSHandler implements SmsHandlerInterface
 
     public function lookupNumber($number, $countryCode)
     {
-        $lookupClient = new \Lookups_Services_Twilio($this->accountSid, $this->authToken);
+        $lookupClient = new \Lookups_Services_Twilio($this->accountSid,
+          $this->authToken);
         try {
-            $number = $lookupClient->phone_numbers->get($number, ['CountryCode' => $countryCode]);
-        }
-        catch (Services_Twilio_RestException $e) {
+            $number = $lookupClient->phone_numbers->get($number,
+              ['CountryCode' => $countryCode]);
+        } catch (Services_Twilio_RestException $e) {
             throw new InvalidPhoneNumberException($e->getMessage());
         }
         return $number->phone_number;
@@ -62,12 +64,11 @@ class TwilioSMSHandler implements SmsHandlerInterface
         }
         try {
             $sms = $this->client->account->messages->create([
-                'From' => $from,
-                'To' => $to,
-                'Body' => $body,
+              'From' => $from,
+              'To' => $to,
+              'Body' => $body,
             ]);
-        }
-        catch (Services_Twilio_RestException $e) {
+        } catch (Services_Twilio_RestException $e) {
             throw new SMSSendFailException($e->getMessage());
         }
         return $sms->sid;

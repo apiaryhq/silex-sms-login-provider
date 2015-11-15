@@ -13,13 +13,15 @@ namespace Apiary\SmsLoginProvider\Test;
 
 use Apiary\SmsLoginProvider\SmsLoginController;
 
-class SmsLoginControllerTest extends \PHPUnit_Framework_TestCase {
+class SmsLoginControllerTest extends \PHPUnit_Framework_TestCase
+{
 
-  public function testConstruction() {
-    $handler = $this->getMock('Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface');
-    $controller = new SmsLoginController($handler);
-    $this->assertNotEmpty($controller);
-  }
+    public function testConstruction()
+    {
+        $handler = $this->getMock('Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface');
+        $controller = new SmsLoginController($handler);
+        $this->assertNotEmpty($controller);
+    }
 
-  // TODO: Test controller actions
+    // TODO: Test controller actions
 }
