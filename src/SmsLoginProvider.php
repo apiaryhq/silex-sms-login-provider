@@ -63,7 +63,7 @@ class SmsLoginProvider implements ServiceProviderInterface, ControllerProviderIn
       });
 
       $app['security.authentication_provider.'.$name.'.sms'] = $app->share(function () use ($app, $name) {
-        return new SMSAuthenticator($name, $app['session']->get('code'), $app['monolog']);
+        return new SmsAuthenticator($name, $app['session']->get('code'), $app['monolog']);
       });
 
       $app['security.authentication_listener.'.$name.'.sms'] = $app->share(function () use ($app, $name, $options) {
