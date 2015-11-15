@@ -36,6 +36,7 @@ class SmsLoginProvider implements ServiceProviderInterface, ControllerProviderIn
 
         // Convert Twilio exception to Auth exception
         $app->error(function (\Services_Twilio_RestException $e) use ($app) {
+            $app['monolog']->addDebug('Converting Twilio Exception: ' . $e->getMessage());
             $app['session']->set(Security::AUTHENTICATION_ERROR,
               new BadCredentialsException('Invalid phone number'));
             return $app->redirect($app['url_generator']->generate('sms.login'));
