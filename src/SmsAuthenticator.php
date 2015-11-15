@@ -8,7 +8,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
-class SMSAuthenticator implements AuthenticationProviderInterface {
+class SmsAuthenticator implements AuthenticationProviderInterface {
 
   private $code;
   private $logger;
