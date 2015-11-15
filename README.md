@@ -7,7 +7,7 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-Silex add on to provide SMS based login service. This is a 2-step process. First the user 
+Silex add on to provide SMS based login service. This is a 2-step process. First the user enters their mobile phone number, an SMS is sent to their phone that contains a login code. The user enters the code to validate the session and login. 
 
 ## Install
 
