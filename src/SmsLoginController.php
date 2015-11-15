@@ -98,7 +98,7 @@ class SmsLoginController {
       throw new AuthenticationException('Mobile number is required');
     }
 
-    $number = $this->handler->lookupNumber($mobile, $country);
+    $number = $this->debug ? $mobile : $this->handler->lookupNumber($mobile, $country);
     $code = sprintf("%'.04d", rand(0, 9999));
     $app['session']->set('code', $code);
     $message = sprintf($this->messageTemplate, $code);
