@@ -61,6 +61,17 @@ $app['security.firewalls'] = array(
 Note that the `$app['user.manager']` must be an implementation of `UserProviderInterface`
 and also provide mobile phone numbers as usernames. 
 
+## Debug mode
+
+If you don't want to send SMS messages during development you can activate the SMS debug
+mode. In this case the verification code is not sent to the the phone number, but is 
+instead concatenated to the number for display on the verification form. 
+Obviously, this should never be enabled on production or you'll have no security at all!
+
+``` php
+$app['sms.debug'] = true;
+```
+
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
