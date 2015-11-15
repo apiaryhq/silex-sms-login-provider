@@ -55,6 +55,7 @@ class SmsLoginController {
    * @param \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface $handler
    * @param string|NULL $view
    * @param string|NULL $message
+   * @param null $debug
    */
   public function __construct(SmsHandlerInterface $handler, $view = null, $message = null, $debug = null) {
     $this->messageTemplate = $message ?: 'Security code: %s';
