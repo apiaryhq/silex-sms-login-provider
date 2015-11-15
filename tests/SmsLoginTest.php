@@ -14,19 +14,19 @@ use Silex\WebTestCase;
 use Silex\Application;
 use Silex\Provider;
 
-use Apiary\SmsLoginProvider\SmsHandler\TwilioSmsHandlerProvider;
 use Apiary\SmsLoginProvider\SmsLoginProvider;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
+use Symfony\Component\BrowserKit\Cookie;
 
 class SmsLoginTest extends WebTestCase {
 
   public function createApplication() {
     $app = new Application();
     $app['debug'] = true;
-    $app['session.test'] = true;
+//    $app['session.test'] = true;
     $app['sms.debug'] = true;
     $app['monolog.logfile'] = __DIR__.'/../build/logs/dev.monolog.log';
-    $app['session.storage'] = new MockArraySessionStorage();
+    $app['session.storage'] = new MockFileSessionStorage();
 
     $app->register(new Provider\TwigServiceProvider);
     $app->register(new Provider\ServiceControllerServiceProvider);
@@ -35,13 +35,13 @@ class SmsLoginTest extends WebTestCase {
     $app->register(new Provider\UrlGeneratorServiceProvider);
     $app->register(new Provider\MonologServiceProvider);
 
-    $accountSid = 'TWILIO_ACCOUNT_SID';
-    $authToken = 'TWILIO_AUTH_TOKEN';
-    $app->register(new TwilioSMSHandlerProvider(), [
-      'sms.handler.from' => 'Test',
-      'sms.handler.twilio_sid' => $accountSid,
-      'sms.handler.twilio_auth_token' => $authToken,
-    ]);
+    $handler = $this->getMock('Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface');
+    $handler->method('lookupNumber')->willReturn('+15005550000');
+    $handler->method('sendSMS')->willReturn(1);
+
+    $app['sms.handler'] = $app->share(function () use ($handler) {
+      return $handler;
+    });
 
     $userManager = $this->getMock('Symfony\Component\Security\Core\User\UserProviderInterface');
     $app['user.manager'] = $app->share(function () use ($userManager) {
@@ -51,6 +51,12 @@ class SmsLoginTest extends WebTestCase {
     $smsLoginProvider = new SmsLoginProvider();
     $app->register($smsLoginProvider);
     $app->mount('', $smsLoginProvider);
+
+    $app->get('/', function () {
+      return $app['twig']->render('home.twig', [
+        'message' => 'Testing',
+      ]);
+    });
 
     $app['security.firewalls'] = array(
       // Login page is accessible to all:
@@ -66,18 +72,34 @@ class SmsLoginTest extends WebTestCase {
       ),
     );
     $app['twig.templates'] = [
-      'login.twig' => '<form></form>',
+      'login.twig' => '<form action="{{ form_action }}">{% if mobile is defined %}<p class="number">{{ mobile }}</p>{% endif %}</form>',
+      'home.twig' => 'Homepage {{ message }}',
     ];
     unset($app['exception_handler']);
     return $app;
   }
 
-  public function testEnterMobileForm() {
+  public function testGetMobileForm() {
     $client = $this->createClient();
     $crawler = $client->request('GET', '/login');
     $this->assertTrue($client->getResponse()->isOk());
-    $this->assertCount(1, $crawler->filter('form'));
+    $this->assertTrue($client->getResponse()->isOk());
+    $this->assertCount(1, $crawler->filter('form[action="/login"]'));
   }
 
+  public function testPostMobileForm() {
 
+    $client = $this->createClient();
+
+    $crawler = $client->request('POST', '/login', ['mobile' => '+15005550000']);
+    $this->assertTrue($client->getResponse()->isOk());
+    $this->assertCount(1, $crawler->filter('form[action="/login/check"]'));
+
+    $numberText = $crawler->filter('.number')->text();
+    preg_match("/\((\d\d\d\d)\)/", $numberText, $code);
+    $code = $code[1];
+    $this->assertRegExp('/\d\d\d\d/', $code);
+
+  }
+  
 }
