@@ -66,7 +66,7 @@ class SmsLoginController
     ) {
         $this->messageTemplate = $message ?: 'Security code: %s';
         $this->debug = $debug ?: false;
-        $countryData = file_get_contents(__DIR__ . '/../data/countries.json');
+        $countryData = file_get_contents(__DIR__.'/../data/countries.json');
         $this->countries = json_decode($countryData);
         $this->handler = $handler;
         $this->viewName = $view ?: 'login.twig';
