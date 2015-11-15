@@ -81,7 +81,7 @@ If you discover any security related issues, please email darren@apiaryhq.com in
 
 ## Credits
 
-- [Darren Mothersele][http://www.darrenmothersele.com/]
+- [Darren Mothersele](http://www.darrenmothersele.com/)
 - [All Contributors][link-contributors]
 
 [Skeleton](https://github.com/thephpleague/skeleton/) package from The PHP League.
