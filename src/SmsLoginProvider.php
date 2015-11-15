@@ -19,6 +19,7 @@ use Symfony\Component\Security\Http\Firewall\UsernamePasswordFormAuthenticationL
 use Symfony\Component\Security\Http\EntryPoint\FormAuthenticationEntryPoint;
 use Symfony\Component\Security\Http\Authentication\DefaultAuthenticationSuccessHandler;
 use Symfony\Component\Security\Http\Authentication\DefaultAuthenticationFailureHandler;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 
 class SmsLoginProvider implements ServiceProviderInterface, ControllerProviderInterface {
@@ -31,8 +32,14 @@ class SmsLoginProvider implements ServiceProviderInterface, ControllerProviderIn
       ->bind('sms.login');
     $controllers->post('/login', 'login.controller:verifyAction');
 
+    // Convert Twilio exception to Auth exception
     $app->error(function (\Services_Twilio_RestException $e) use ($app) {
       $app['session']->set(Security::AUTHENTICATION_ERROR, new BadCredentialsException('Invalid phone number'));
+      return $app->redirect($app['url_generator']->generate('sms.login'));
+    });
+    // Store Auth exception and go back to login form
+    $app->error(function (AuthenticationException $e) use ($app) {
+      $app['session']->set(Security::AUTHENTICATION_ERROR, $e);
       return $app->redirect($app['url_generator']->generate('sms.login'));
     });
 
