@@ -42,7 +42,9 @@ class SmsLoginProvider implements ServiceProviderInterface, ControllerProviderIn
 
   public function register(Application $app) {
     $app['login.controller'] = $app->share(function () use ($app) {
-      return new SmsLoginController($app['sms.handler']);
+      // TODO: Pass in arguments for view template and message template
+      $debug = isset($app['sms.debug']) ? $app['sms.debug'] : false;
+      return new SmsLoginController($app['sms.handler'], null, null, $debug);
     });
 
     $app['security.authentication_listener.factory.sms'] = $app->protect(function ($name, $options) use ($app) {

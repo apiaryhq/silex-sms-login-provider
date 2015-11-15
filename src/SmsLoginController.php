@@ -48,14 +48,17 @@ class SmsLoginController {
    */
   protected $viewName;
 
+  protected $debug;
+
   /**
    * SmsLoginController constructor.
    * @param \Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface $handler
    * @param string|NULL $view
    * @param string|NULL $message
    */
-  public function __construct(SmsHandlerInterface $handler, $view = null, $message = null) {
+  public function __construct(SmsHandlerInterface $handler, $view = null, $message = null, $debug = null) {
     $this->messageTemplate = $message ?: 'Security code: %s';
+    $this->debug = $debug ?: FALSE;
     $countryData = file_get_contents( __DIR__ . '/../data/countries.json');
     $this->countries = json_decode($countryData);
     $this->handler = $handler;
@@ -98,10 +101,12 @@ class SmsLoginController {
     $code = sprintf("%'.04d", rand(0, 9999));
     $app['session']->set('code', $code);
     $message = sprintf($this->messageTemplate, $code);
-    $this->handler->sendSMS($number, $message);
+    if (!$this->debug) {
+      $this->handler->sendSMS($number, $message);
+    }
 
     return $app['twig']->render($this->viewName, [
-      'mobile' => $number,
+      'mobile' => $number . ($this->debug ? " ({$code})" : ''),
       'form_action' => $app['url_generator']->generate('sms.login') . '/check',
     ]);
   }

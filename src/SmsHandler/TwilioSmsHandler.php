@@ -11,13 +11,13 @@ namespace Apiary\SmsLoginProvider\SMSHandler;
 
 
 use Apiary\SmsLoginProvider\Exception\InvalidPhoneNumberException;
-use Apiary\SmsLoginProvider\Exception\SMSSendFailException;
+use Apiary\SmsLoginProvider\Exception\SmsSendFailException;
 use Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface;
 use Lookups_Services_Twilio;
 use Services_Twilio_RestException;
 use Services_Twilio;
 
-class TwilioSMSHandler implements SmsHandlerInterfacedlerInterface
+class TwilioSMSHandler implements SmsHandlerInterface
 {
 
     private $accountSid;
