@@ -100,5 +100,5 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [link-scrutinizer]: https://scrutinizer-ci.com/g/thephpleague/:package_name/code-structure
 [link-code-quality]: https://scrutinizer-ci.com/g/thephpleague/:package_name
 [link-downloads]: https://packagist.org/packages/league/:package_name
-[link-author]: https://github.com/:author_username
+[link-author]: http://www.darrenmothersele.com/
 [link-contributors]: ../../contributors
