@@ -2,12 +2,10 @@
 
 namespace Apiary\SmsLoginProvider;
 
-use Silex\Application;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 
 class SmsAuthenticator implements AuthenticationProviderInterface {
@@ -32,6 +30,7 @@ class SmsAuthenticator implements AuthenticationProviderInterface {
       throw new AuthenticationException("Authentication code does not match");
     }
     $user = $token->getUser();
+    // TODO: Provide a mechanism to get the real user object, and set user roles in token
     $token = new UsernamePasswordToken($user, $token->getCredentials(), $this->name, ['ROLE_USER']);
     return $token;
   }
