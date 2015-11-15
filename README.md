@@ -1,4 +1,4 @@
-# :package_name
+#  Silex SMS Login Provider
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
@@ -81,7 +81,7 @@ If you discover any security related issues, please email darren@apiaryhq.com in
 
 ## Credits
 
-- [Darren Mothersele][link-author]
+- [Darren Mothersele][http://www.darrenmothersele.com/]
 - [All Contributors][link-contributors]
 
 ## License
