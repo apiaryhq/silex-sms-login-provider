@@ -10,7 +10,7 @@
 
 namespace Apiary\SmsLoginProvider\Test;
 
-use Apiary\SmsLoginProvider\SMSHandler\MockSmsHandlerProvider;
+use Apiary\SmsLoginProvider\SmsHandler\MockSmsHandlerProvider;
 use Silex\WebTestCase;
 use Silex\Application;
 use Silex\Provider;
