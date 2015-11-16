@@ -16,7 +16,10 @@ use Silex\Application;
 use Silex\Provider;
 
 use Apiary\SmsLoginProvider\SmsLoginProvider;
+use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+
 
 class SmsLoginTest extends WebTestCase
 {
@@ -36,18 +39,17 @@ class SmsLoginTest extends WebTestCase
         $app->register(new Provider\UrlGeneratorServiceProvider);
         $app->register(new Provider\MonologServiceProvider);
 
+        // Mock services
         $app->register(new MockSmsHandlerProvider());
-
-        $userManager = $this->getMock('Symfony\Component\Security\Core\User\UserProviderInterface');
-        $app['user.manager'] = $app->share(function () use ($userManager) {
-            return $userManager;
+        $app['user.manager'] = $app->share(function () {
+            return new MockUserProvider();
         });
 
         $smsLoginProvider = new SmsLoginProvider();
         $app->register($smsLoginProvider);
         $app->mount('', $smsLoginProvider);
 
-        $app->get('/', function () {
+        $app->get('/', function () use ($app) {
             return $app['twig']->render('home.twig', [
               'message' => 'Testing',
             ]);
@@ -55,9 +57,9 @@ class SmsLoginTest extends WebTestCase
 
         $app['security.firewalls'] = array(
             // Login page is accessible to all:
-          'login' => array(
-            'pattern' => '^/login$',
-          ),
+            'login' => array(
+                'pattern' => '^/login$',
+            ),
             // Everything else is secured:
           'secured_area' => array(
             'pattern' => '^.*$',
@@ -69,7 +71,10 @@ class SmsLoginTest extends WebTestCase
           ),
         );
         $app['twig.templates'] = [
-          'login.twig' => '<form action="{{ form_action }}">{% if mobile is defined %}<p class="number">{{ mobile }}</p>{% endif %}</form>',
+          'login.twig' => '<form action="{{ form_action }}" method="POST">{% if mobile is defined %}<p class="number">{{ mobile }}</p>'
+              .'<input type="hidden" name="mobile" value="{{ mobile }}" />{% endif %}'
+              .'<input type="password" placeholder="Secret code" name="code" />'
+              .'<button class="btn btn-positive btn-block" name="submit">Login</button></form>',
           'home.twig' => 'Homepage {{ message }}',
         ];
         unset($app['exception_handler']);
@@ -90,7 +95,7 @@ class SmsLoginTest extends WebTestCase
 
         $client = $this->createClient();
         $crawler = $client->request('POST', '/login', ['mobile' => '+15005550000']);
-        
+
         $this->assertTrue($client->getResponse()->isOk());
         $this->assertCount(1, $crawler->filter('form[action="/login/check"]'));
 
@@ -100,5 +105,22 @@ class SmsLoginTest extends WebTestCase
         $this->assertRegExp('/\d\d\d\d/', $code);
 
     }
+
+    public function testLoggedInArea()
+    {
+        $client = $this->createClient();
+        $session = $this->app['session'];
+
+        $firewall = 'secured_area';
+        $token = new UsernamePasswordToken('+15005550000', null, $firewall, ['ROLE_ADMIN']);
+        $session->set('_security_'.$firewall, serialize($token));
+
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $client->getCookieJar()->set($cookie);
+        $client->request('GET', '/');
+
+        $this->assertTrue($client->getResponse()->isOk());
+    }
+
 
 }
