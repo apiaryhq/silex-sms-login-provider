@@ -22,8 +22,11 @@ class TwilioSmsHandlerProvider implements ServiceProviderInterface
             $app['sms.handler.from'] = 'Apiary';
         }
         $app['sms.handler'] = $app->share(function () use ($app) {
-            return new TwilioSmsHandler($app['sms.handler.twilio_sid'],
-              $app['sms.handler.twilio_auth_token']);
+            $lookupClient = new \Lookups_Services_Twilio($app['sms.handler.twilio_sid'],
+                $app['sms.handler.twilio_auth_token']);
+            $client = new \Services_Twilio($app['sms.handler.twilio_sid'],
+                $app['sms.handler.twilio_auth_token']);
+            return new TwilioSmsHandler($lookupClient, $client);
         });
     }
 
