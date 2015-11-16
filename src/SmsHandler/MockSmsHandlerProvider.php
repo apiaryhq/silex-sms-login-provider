@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Apiary\SmsLoginProvider\SMSHandler;
+namespace Apiary\SmsLoginProvider\SmsHandler;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;

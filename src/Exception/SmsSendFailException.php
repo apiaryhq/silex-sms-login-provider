@@ -11,7 +11,7 @@
 namespace Apiary\SmsLoginProvider\Exception;
 
 
-class SMSSendFailException extends \Exception
+class SmsSendFailException extends \Exception
 {
 
 }
