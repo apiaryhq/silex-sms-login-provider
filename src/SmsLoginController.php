@@ -59,14 +59,13 @@ class SmsLoginController
      * @param null $debug
      */
     public function __construct(
-      SmsHandlerInterface $handler,
-      $view = null,
-      $message = null,
-      $debug = null
-    ) {
+        SmsHandlerInterface $handler,
+        $view = null,
+        $message = null
+    )
+    {
         $this->messageTemplate = $message ?: 'Security code: %s';
-        $this->debug = $debug ?: false;
-        $countryData = file_get_contents(__DIR__.'/../data/countries.json');
+        $countryData = file_get_contents(__DIR__ . '/../data/countries.json');
         $this->countries = json_decode($countryData);
         $this->handler = $handler;
         $this->viewName = $view ?: 'login.twig';
@@ -83,9 +82,9 @@ class SmsLoginController
     public function loginAction(Application $app, Request $request)
     {
         return $app['twig']->render($this->viewName, [
-          'country_list' => $this->countries,
-          'error' => $app['security.last_error']($request),
-          'form_action' => $app['url_generator']->generate('sms.login'),
+            'country_list' => $this->countries,
+            'error' => $app['security.last_error']($request),
+            'form_action' => $app['url_generator']->generate('sms.login'),
         ]);
     }
 
@@ -106,18 +105,16 @@ class SmsLoginController
             throw new AuthenticationException('Mobile number is required');
         }
 
-        $number = $this->debug ? $mobile : $this->handler->lookupNumber($mobile,
-          $country);
         $code = sprintf("%'.04d", rand(0, 9999));
         $app['session']->set('code', $code);
+
+        $number = $this->handler->lookupNumber($mobile, $country);
         $message = sprintf($this->messageTemplate, $code);
-        if (!$this->debug) {
-            $this->handler->sendSMS($number, $message);
-        }
+        $this->handler->sendSMS($number, $message);
 
         return $app['twig']->render($this->viewName, [
-          'mobile' => $number . ($this->debug ? " ({$code})" : ''),
-          'form_action' => $app['url_generator']->generate('sms.login') . '/check',
+            'mobile' => $number,
+            'form_action' => $app['url_generator']->generate('sms.login') . '/check',
         ]);
     }
 

@@ -10,6 +10,7 @@
 
 namespace Apiary\SmsLoginProvider\Test;
 
+use Apiary\SmsLoginProvider\SMSHandler\MockSmsHandlerProvider;
 use Silex\WebTestCase;
 use Silex\Application;
 use Silex\Provider;
@@ -25,7 +26,6 @@ class SmsLoginTest extends WebTestCase
         $app = new Application();
         $app['debug'] = true;
         $app['session.test'] = true;
-        $app['sms.debug'] = true;
         $app['monolog.logfile'] = __DIR__ . '/../build/logs/dev.monolog.log';
         $app['session.storage'] = new MockFileSessionStorage();
 
@@ -36,13 +36,7 @@ class SmsLoginTest extends WebTestCase
         $app->register(new Provider\UrlGeneratorServiceProvider);
         $app->register(new Provider\MonologServiceProvider);
 
-        $handler = $this->getMock('Apiary\SmsLoginProvider\SmsHandler\SmsHandlerInterface');
-        $handler->method('lookupNumber')->willReturn('+15005550000');
-        $handler->method('sendSMS')->willReturn(1);
-
-        $app['sms.handler'] = $app->share(function () use ($handler) {
-            return $handler;
-        });
+        $app->register(new MockSmsHandlerProvider());
 
         $userManager = $this->getMock('Symfony\Component\Security\Core\User\UserProviderInterface');
         $app['user.manager'] = $app->share(function () use ($userManager) {
@@ -95,9 +89,10 @@ class SmsLoginTest extends WebTestCase
     {
 
         $client = $this->createClient();
+        $crawler = $client->request('POST', '/login', ['mobile' => '+15005550000']);
 
-        $crawler = $client->request('POST', '/login',
-          ['mobile' => '+15005550000']);
+        print_r($client->getResponse()->getContent());
+
         $this->assertTrue($client->getResponse()->isOk());
         $this->assertCount(1, $crawler->filter('form[action="/login/check"]'));
 

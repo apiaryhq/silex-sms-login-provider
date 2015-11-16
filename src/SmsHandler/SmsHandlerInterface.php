@@ -10,9 +10,6 @@
 
 namespace Apiary\SmsLoginProvider\SmsHandler;
 
-use Apiary\SmsLoginProvider\Exception\InvalidPhoneNumberException;
-use Apiary\SmsLoginProvider\Exception\SMSSendFailException;
-
 /**
  * Interface SmsHandlerInterface
  * @package Apiary
@@ -32,7 +29,7 @@ interface SmsHandlerInterface
      * @param string $number Phone number in any format
      * @param string $countryCode ISO Country code
      * @return string Validated number in E.164 format
-     * @throws InvalidPhoneNumberException
+     * @throws Apiary\SmsLoginProvider\Exception\InvalidPhoneNumberException
      */
     public function lookupNumber($number, $countryCode);
 
@@ -43,7 +40,7 @@ interface SmsHandlerInterface
      * @param $to
      * @param $body
      * @return string identifier of sent message
-     * @throws SmsSendFailException
+     * @throws Apiary\SmsLoginProvider\Exception\SMSSendFailException
      */
     public function sendSMS($to, $body, $from = null);
 
