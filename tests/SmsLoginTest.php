@@ -90,9 +90,7 @@ class SmsLoginTest extends WebTestCase
 
         $client = $this->createClient();
         $crawler = $client->request('POST', '/login', ['mobile' => '+15005550000']);
-
-        print_r($client->getResponse()->getContent());
-
+        
         $this->assertTrue($client->getResponse()->isOk());
         $this->assertCount(1, $crawler->filter('form[action="/login/check"]'));
 
